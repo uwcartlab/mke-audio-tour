@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+            <title></title>
+
+        <!--custom stylesheet-->
+        <link rel="stylesheet" href="css/style.css">
+        <!--external stylesheets-->
+        <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+        <link rel="stylesheet" href="lib/bootstrap.min.css">
+
+    </head>
+    <body>
+        <!--modal-->
+        <div class="modal" id="stop-modal">
+            <div class="modal-dialog" id="stop-dialogue">
+                <div class="modal-content" id="stop-content">
+                    <div class="modal-header">
+                        <div class="col-md-6 offset-md-3 col-sm-12 col-12" id="title-container">
+                            <h1 class="modal-title" id="stop-title"></h1>
+                        </div>
+                        <button type="button" id="close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body col-md-6 offset-md-3 col-sm-12 col-12" id="stop-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" id="close" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>          
+        <!--map-->
+        <div id="map"></div>
+        <!--center button-->
+        <button id="center">Center Map</button>
+        <!--external scripts-->
+        <script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+        <script type="text/javascript" src="lib/papaparse.js"></script>
+        <script type="text/javascript" src="lib/bootstrap.min.js"></script>
+        <!--custom scripts-->
+        <script type="text/javascript" src="js/main.js"></script>
+    </body>
+</html>

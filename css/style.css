@@ -1,0 +1,50 @@
+body{
+    margin:0;
+}
+#map{
+    width:100vw;
+    height:100vh;
+}
+button{
+    border:2px black solid;
+    background:rgba(255,255,255,0.7);
+    font-size:14pt !important;
+}
+button:hover{
+    background:rgba(0,0,0,0.3);
+}
+/*modal styling*/
+#title-container{
+    padding-left:10px;
+}
+#stop-content{
+    width:100vw;
+    margin:0;
+    border-radius: 0;
+}
+#stop-dialogue{
+    height:100vh;
+    margin:0;
+}
+#stop-body{
+    height:100%;
+    overflow:scroll;
+}
+#stop-img{
+    width:100%;
+}
+#stop-text{
+    font-size:20px;
+}
+/*center button*/
+#center{
+    display:block;
+    width:150px;
+    height:40px;
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    z-index:400;
+    font-size:20px;
+    font-weight:bold;
+}
