@@ -5,23 +5,34 @@
 //create layout for popup at each stop (less important)
 
 (function(){
-    let map, stops, locationMarker, circle, active = false, center = true, played = []
+    let map, route, stops, locationMarker, circle, currentStop = 1, tourLength = 0, active = false, center = false, played = [];
+    //styling variables
+    let routeColor = "#2d862d",
+        activeStop = "#2d862d",
+        inactiveStop = "white";
+    //starting position
+    let startPosition = [43.08363877892471,-87.89072781259704]
 
+    //splash screen modal variables
+    let splash = document.getElementById('splash-modal'),
+        splashModal = new bootstrap.Modal(splash);
+    splashModal.show();
     //modal variables for stops
     let stop = document.getElementById('stop-modal'),
         stopModal = new bootstrap.Modal(stop);
-    
+
     function createMap(){
         map = L.map("map",{
-            center: [43.08386938708114,-87.89021044302959],
-            zoom:14,
-            maxZoom:17,
+            center: startPosition,
+            zoom:17,
+            maxZoom:18,
             minZoom:12
         });
         //set basemap tileset
-        let basemap = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-            maxZoom: 20,
-            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+        let basemap = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
 
         buffers = L.layerGroup().addTo(map);
@@ -29,8 +40,11 @@
         //location listener
         map.on('locationfound', onLocationFound);
         //don't automatically center the map if the map has been panned
-        map.on("mousedown",function(){
-            center = false;
+        map.on("mousedown",function(ev){
+            //turn off map centering if map is panned
+            if (ev.originalEvent.originalTarget.id == "map")
+                center = false;
+
             document.querySelector("#center").style.display = "block";
         })
         //set click listener for the center map button
@@ -45,6 +59,7 @@
             });
         }, 5000);
         //add stop data
+        addRoute();
         addStops();
         //get initial location and center map
         map.locate({setView:false, watch:true, enableHighAccuracy: true});
@@ -77,6 +92,20 @@
         //removeFoundMarker(circle, locationMarker);
         checkLocation(radius);
     }
+    //add tour route to the map
+    function addRoute(){
+        fetch("assets/route.geojson")
+            .then(res => res.json())
+            .then(data => {
+                route = L.geoJson(data,{
+                    style:{
+                        color:routeColor,
+                        dashArray:"5 10",
+                        weight:5
+                    }
+                }).addTo(map)
+            })
+    }
     //add tour stops to map
     function addStops(){
         let radius = 20;
@@ -96,6 +125,10 @@
                 }
                 //populate geojson
                 data.forEach(function(feature, i){
+                    //add to total length
+                    if (!feature.hidden)
+                        tourLength++;
+            
                     //create empty object
                     let obj = {};
                     //set feature
@@ -113,17 +146,25 @@
                 //add geojson to map
                 stops = L.geoJson(geojson,{
                     pointToLayer:function(feature, latlng){
+                        //open tooltip if first stop
+                        if (feature.properties.id == 1){
+                            var popup = L.popup()
+                                        .setLatLng(latlng)
+                                        .setContent('<p>Begin your tour at the Hubbard Park parking lot.</p>')
+                                        .openOn(map);
+                        }
                         //set point styling
                         let options = {
-                            radius:5,
-                            color:"black",
+                            radius:8,
+                            color:stopOutlineColor(feature.properties),
                             opacity:setOpacity(feature.properties),
-                            fillColor:"black",
-                            fillOpacity:setOpacity(feature.properties)
+                            fillColor:stopColor(feature.properties),
+                            fillOpacity:setOpacity(feature.properties),
+                            pane:"markerPane"
                         }
                         //function to hide hidden stops
                         function setOpacity(props){
-                            return props.hidden == "true" ? 0 : 0.6;
+                            return props.hidden == "TRUE" ? 0 : 1;
                         }
                         
                         return L.circleMarker(latlng, options);
@@ -132,13 +173,27 @@
                         //open modal if layer is not hidden
                         layer.on('click',function(){
                             if (feature.properties.hidden != "true"){
-                                openModal(feature.properties)
-                                center = true;
-                            }
+                                openModal(feature.properties)                            }
                         })
                     }
                 }).addTo(map);
             })
+    }
+    //set stop color
+    function stopColor(props){
+        return props.id == currentStop ? activeStop : inactiveStop;
+    }
+    function stopOutlineColor(props){
+        return props.id == currentStop ? inactiveStop : activeStop;
+    }
+    //update stop stype
+    function updateStopColor(){
+        stops.eachLayer(function(layer){
+            layer.setStyle({
+                color:stopOutlineColor(layer.feature.properties),
+                fillColor:stopColor(layer.feature.properties)
+            })
+        })
     }
     //compare user's location to every point on the map
     function checkLocation(radius){
@@ -157,11 +212,11 @@
                 if(layerBounds.intersects(circleBounds)){
                     //play audio and open modal if it hasn't been played before
                     if (active == false && !played.includes(layer.feature.properties.id)){
-                        //play audio
-                        playAudio(layer.feature.properties.audio)
                         //open modal
                         if (layer.feature.properties.hidden != "true")
                             openModal(layer.feature.properties)
+                        //play audio
+                        playAudio(layer.feature.properties.audio)
                         //add feature to "played" list
                         played.push(layer.feature.properties.id)
                     }
@@ -175,6 +230,9 @@
     }
     //open modal
     function openModal(props){
+        //set current stop
+        currentStop = (Number(props.id) + 1) > tourLength ? Number(props.id) : Number(props.id) + 1;
+        updateStopColor();
         //clear body
         document.querySelector("#stop-body").innerHTML = "";
         document.querySelector("#title-container").innerHTML = "";
@@ -204,10 +262,20 @@
             let p = "<p id='stop-text'>" + props.text + "</p>";
             document.querySelector("#stop-body").insertAdjacentHTML("beforeend",p)
         }
-
-
+        //add listeners for closing modal if previous button or x is pressed
+        document.querySelectorAll(".close").forEach(function(elem){
+            elem.addEventListener("click", function(){
+                if (elem.id == "prev"){
+                    currentStop = props.id - 1 < 1 ? props.id : 1;
+                }
+                if (elem.id == "x"){
+                    currentStop = props.id;
+                }
+                updateStopColor();
+            })
+        })
         stopModal.show();
-    }
+}
     //play audio
     function playAudio(audioFile){
         active = true;
@@ -234,17 +302,17 @@
             stopModal.hide();
         }
         //add listener to stop audio if modal is closed
-        document.querySelectorAll("#close").forEach(function(elem){
+        document.querySelectorAll(".close").forEach(function(elem){
             elem.addEventListener("click",stopAudio)
         })
-        //add listener to stop audio if the play button is pressed
+        //add listener to stop audio if the stop button is pressed
         document.querySelector("#play-audio").addEventListener("click",stopAudio)
         //function to deactivate audio element and reset button
         function stopAudio(){
             //remove audio element
             audio.pause();
             audio.remove();
-
+            //reset audio buttons
             document.querySelector("#play-audio").innerHTML = "Play Audio";               
             document.querySelector("#play-audio").removeEventListener("click",stopAudio);
 
@@ -252,11 +320,8 @@
                 document.querySelector(".play").remove();
             //set page state to inactive
             active = false; 
-            //reset play button
-            document.querySelector("#play-audio").innerHTML = "Play Audio";
         }
     }
-
 
     createMap();
 })();

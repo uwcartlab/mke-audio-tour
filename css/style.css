@@ -13,6 +13,27 @@ button{
 button:hover{
     background:rgba(0,0,0,0.3);
 }
+/*splash modal*/
+#splash-dialogue, #splash-content, #splash-modal{
+    margin:0;
+    max-width: 100vw !important;
+    width:100vw !important;
+    height:100vh !important;
+}
+#splash-content{
+    border-radius: 0;
+}
+#splash-body{
+    height:100%;
+    overflow:scroll;
+}
+#splash-content p{
+    font-size:18px;
+}
+#start{
+    margin:auto;
+}
+
 /*modal styling*/
 #title-container{
     padding-left:10px;
@@ -36,14 +57,23 @@ button:hover{
 #stop-text{
     font-size:20px;
 }
+#stop-footer{
+    display:block !important;
+}
+#prev{
+    float:left;
+}
+#next{
+    float:right;
+}
 /*center button*/
 #center{
     display:block;
-    width:150px;
+    width:100px;
     height:40px;
     position:absolute;
-    bottom:10px;
-    left:10px;
+    top:10px;
+    right:10px;
     z-index:400;
     font-size:20px;
     font-weight:bold;
