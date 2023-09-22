@@ -25,12 +25,12 @@ button:hover{
 }
 #splash-body{
     height:100%;
-    overflow:scroll;
+    overflow:auto;
     -webkit-overflow-scrolling: touch;
 }
 #splash-content p{
     font-size:18px;
-    height: calc(100% - 70px);
+    height: calc(100% - 40px);
     
 }
 #start{
