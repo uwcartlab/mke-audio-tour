@@ -25,6 +25,7 @@ button:hover{
 }
 #splash-body{
     height:100%;
+    padding-bottom:20px;
     overflow:auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -33,6 +34,7 @@ button:hover{
     }
 #start{
     margin:auto;
+    display:block;
 }
 
 /*modal styling*/
