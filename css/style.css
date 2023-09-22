@@ -29,6 +29,8 @@ button:hover{
 }
 #splash-content p{
     font-size:18px;
+    height: calc(100% - 70px);
+    overflow: scroll;
 }
 #start{
     margin:auto;
