@@ -108,7 +108,7 @@
     }
     //add tour stops to map
     function addStops(){
-        let radius = 20;
+        let radius = 50;
 
         fetch("assets/stops.csv")
             .then(res => res.text())
